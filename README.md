@@ -3,5 +3,5 @@
 ## Use
 
 ```
-brew tap saltbo/bin
+brew tap saltbo/tap
 ```
