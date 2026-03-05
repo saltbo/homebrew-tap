@@ -1,0 +1,59 @@
+name: Update Anima Cask
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'  # every 15 minutes
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for new release
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          LATEST=$(gh release view --repo saltbo/anima --json tagName --jq '.tagName' | sed 's/^v//')
+          CURRENT=$(grep 'version "' Casks/anima.rb | head -1 | sed 's/.*version "//;s/"//')
+          echo "latest=${LATEST}" >> "$GITHUB_OUTPUT"
+          echo "current=${CURRENT}" >> "$GITHUB_OUTPUT"
+          if [ "$LATEST" = "$CURRENT" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Compute SHA256
+        if: steps.check.outputs.skip == 'false'
+        id: sha
+        run: |
+          VERSION="${{ steps.check.outputs.latest }}"
+          ARM_SHA=$(curl -sL "https://github.com/saltbo/anima/releases/download/v${VERSION}/Anima-${VERSION}-arm64.dmg" | shasum -a 256 | awk '{print $1}')
+          INTEL_SHA=$(curl -sL "https://github.com/saltbo/anima/releases/download/v${VERSION}/Anima-${VERSION}.dmg" | shasum -a 256 | awk '{print $1}')
+          echo "arm=${ARM_SHA}" >> "$GITHUB_OUTPUT"
+          echo "intel=${INTEL_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Update Cask
+        if: steps.check.outputs.skip == 'false'
+        run: |
+          VERSION="${{ steps.check.outputs.latest }}"
+          ARM_SHA="${{ steps.sha.outputs.arm }}"
+          INTEL_SHA="${{ steps.sha.outputs.intel }}"
+          sed -i '' "s/version \".*\"/version \"${VERSION}\"/" Casks/anima.rb
+          sed -i '' "s/sha256 arm:   \".*\"/sha256 arm:   \"${ARM_SHA}\"/" Casks/anima.rb
+          sed -i '' "s/intel: \".*\"/intel: \"${INTEL_SHA}\"/" Casks/anima.rb
+
+      - name: Commit & push
+        if: steps.check.outputs.skip == 'false'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Casks/anima.rb
+          git commit -m "anima: update to ${{ steps.check.outputs.latest }}"
+          git push
