@@ -1,9 +1,9 @@
 cask "anima" do
-  arch arm: "arm64", intel: "1b6454e998f065851a3acabfaeca5da07c755149353f36e395287cf6645aadcd"
+  arch arm: "arm64", intel: "73137c2d4869290868c42baba478bc64da7d79f5c70fea8bc6dcc3055f46b20d"
 
-  version "0.11.11"
-  sha256 arm:   "66185bf5d09f2cf91eb7c7c2d43bf4393d24ca9ddcfe240da1b82ab57e23035d",
-         intel: "1b6454e998f065851a3acabfaeca5da07c755149353f36e395287cf6645aadcd"
+  version "0.12.0"
+  sha256 arm:   "ef92bc3788090c91b86c40dd9e44a8d13210bbe816a05803e540bc9aa92a30f1",
+         intel: "73137c2d4869290868c42baba478bc64da7d79f5c70fea8bc6dcc3055f46b20d"
 
   if Hardware::CPU.arm?
     url "https://github.com/saltbo/anima/releases/download/v#{version}/Anima-#{version}-arm64.dmg"
