@@ -1,6 +1,6 @@
 cask "echola" do
-  version "1.0.4"
-  sha256 "ba87213897dc0ef7fa3768e1a444180434ae65486aabf7a28694d695ae1fd4b6"
+  version "1.0.5"
+  sha256 "494a417404453003313ad42e97b7522d2003e7a31b0d8c90a996f66e5773c106"
 
   url "https://github.com/saltbo/echola-releases/releases/download/v#{version}/echola-macos-v#{version}.dmg"
   name "Echola"
